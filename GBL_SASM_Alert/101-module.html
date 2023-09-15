@@ -28,6 +28,9 @@
     },
     //open editor box
     oneditprepare: function () {
+      //###0. init value
+      $("#moduleflows-node-name").val(this.name);
+
       //###1. Dynamic module select
       //select element
       let moduleSelectElem = $("#module-select");
@@ -115,6 +118,9 @@
     },
     oneditsave: function () {
       var node = this;
+      //name save
+      node.name = $("#moduleflows-node-name").val();
+
       //module save
       node.moduleId = $("#module-select").val();
 
@@ -143,14 +149,32 @@
     },
     //open editor box
     oneditprepare: function () {
+      //###0. init value
+      $("#module-in-node-name").val(this.name);
+
       this.editor = RED.editor.createEditor({
         id: "node-description-editor",
         mode: "ace/mode/markdown",
         value: $("#node-input-info").val()
       });
+
+      //### 1. Duplicated module name
+      //1.1 all module in node
+      let allModuleNames = new Set();
+      RED.nodes.eachNode(node => {
+        allModuleNames.add(node.name);
+      });
+
+      //1.2 Event: change name
+      $("#module-in-node-name").on("focusout", e => {
+        console.log("check");
+      });
     },
     oneditsave: function () {
       var node = this;
+      //name save
+      node.name = $("#module-in-node-name").val();
+
       $("#node-input-info").val(this.editor.getValue());
       this.editor.destroy();
       delete node.editor;
@@ -176,14 +200,31 @@
     },
     label: function () {
       return this.name || "module out";
+    },
+    //open editor box
+    oneditprepare: function () {
+      //###0. init value
+      $("#module-out-node-name").val(this.name);
+    },
+    oneditsave: function () {
+      var node = this;
+      //name save
+      node.name = $("#module-out-node-name").val();
+
+      this.editor.destroy();
+      delete node.editor;
+    },
+    oneditcancle: function () {
+      this.editor.destroy();
+      delete this.editor;
     }
   });
 </script>
 
 <script type="text/html" data-template-name="moduleflows">
   <div class="form-row">
-    <label for="node-input-name"><i class="icon-tag"></i> Name</label>
-    <input type="text" id="node-input-name" placeholder="Name" />
+    <label for="moduleflows-node-name"><i class="icon-tag"></i> Name</label>
+    <input type="text" id="moduleflows-node-name" placeholder="Name" />
   </div>
   <!--module-->
   <div>
@@ -209,8 +250,8 @@
 
 <script type="text/html" data-template-name="module_in">
   <div class="form-row" id="actionflows-name">
-    <label for="node-input-name"><i class="icon-tag"></i> Name</label>
-    <input type="text" id="node-input-name" placeholder="Name" />
+    <label for="module-in-node-name"><i class="icon-tag"></i> Name</label>
+    <input type="text" id="module-in-node-name" placeholder="Name" />
   </div>
 
   <!-- module in : module description -->
@@ -237,8 +278,8 @@
 
 <script type="text/html" data-template-name="module_out">
   <div class="form-row" id="actionflows-name">
-    <label for="node-input-name"><i class="icon-tag"></i> Name</label>
-    <input type="text" id="node-input-name" placeholder="Name" />
+    <label for="module-out-node-name"><i class="icon-tag"></i> Name</label>
+    <input type="text" id="module-out-node-name" placeholder="Name" />
   </div>
 </script>
 
