@@ -1,3 +1,13 @@
+<style>
+  .description-box {
+    width: 70%;
+    margin: 20px auto;
+    padding: 30px;
+    position: relative;
+    border-radius: 5px;
+    box-shadow: 0 0 5px 2px #dedede;
+  }
+</style>
 <script type="text/javascript">
   RED.nodes.registerType("moduleflows", {
     category: "GBL-SASM-Alert",
@@ -183,7 +193,7 @@
       >
       <select id="module-select"></select>
     </div>
-    <div id="module-description" class="text-box"></div>
+    <div id="module-description" class="description-box"></div>
   </div>
   <!--submodule-->
   <div>
@@ -193,7 +203,7 @@
       >
       <select id="submodule-select"></select>
     </div>
-    <div id="submodule-description" class="text-box"></div>
+    <div id="submodule-description" class="description-box"></div>
   </div>
 </script>
 
