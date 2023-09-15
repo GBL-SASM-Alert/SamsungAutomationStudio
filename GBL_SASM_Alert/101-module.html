@@ -11,6 +11,13 @@
     font-size: 8pt;
     color: red;
   }
+  #actionflows-name {
+    display: flex;
+  }
+  #node-name-input-box {
+    display: block;
+    width: 100%;
+  }
 </style>
 <script type="text/javascript">
   RED.nodes.registerType("moduleflows", {
@@ -286,8 +293,10 @@
 
 <script type="text/html" data-template-name="module_in">
   <div class="form-row" id="actionflows-name">
-    <label for="module-in-node-name"><i class="icon-tag"></i> Name</label>
-    <div>
+    <label for="module-in-node-name" id="node-name-label"
+      ><i class="icon-tag"></i> Name</label
+    >
+    <div id="node-name-input-box">
       <input type="text" id="module-in-node-name" placeholder="Name" />
       <div id="module-in-node-error-box" class="error-box"></div>
     </div>
