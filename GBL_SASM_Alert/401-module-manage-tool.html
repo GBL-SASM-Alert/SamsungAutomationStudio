@@ -47,6 +47,17 @@
     background-color: #e6eeff;
     z-index: 1;
   }
+
+  /* tooltip style */
+  .ui-tooltip {
+    background: rgba(0, 0, 0, 0.7);
+    padding: 10px 20px;
+    color: white;
+    border-radius: 10px;
+    font: 12px;
+    border: none;
+    box-shadow: none;
+  }
 </style>
 
 <script type="text/javascript">
@@ -103,7 +114,7 @@
 
         for (let n in moduleNodes) {
           let node = moduleNodes[n];
-          let modules = `<div class="module-manage-tool__module-title">
+          let modules = `<div class="module-manage-tool__module-title" title="${node.info}">
                           <div>${node.name}</div>
                           <div class="module-manage-tool__jump-link" id="${node.id}"><i class="fa fa-compass"></i></div>
                         </div>
@@ -131,6 +142,22 @@
     $(document).on("click", ".module-manage-tool__module-title", function () {
       $(this).next(".module-manage-tool__module-detail").slideToggle();
     });
+
+    $(document).on(
+      "mouseover",
+      ".module-manage-tool__module-title",
+      function () {
+        $(this).tooltip({
+          position: {
+            my: "right-5 bottom",
+            at: "left bottom",
+            using: function (position, feedback) {
+              $(this).css(position);
+            }
+          }
+        });
+      }
+    );
 
     const moduleManageToolButton = document.querySelector(
       ".module-manage-tool__button"
