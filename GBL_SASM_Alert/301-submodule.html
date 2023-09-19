@@ -65,7 +65,7 @@
       console.log(this.errorMsg);
       console.log(this.duplicatedError);
 
-      $("#submodule-node-name").on("focusout", event => {
+      $("#submodule-node-name").on("input", event => {
         let newName = event.target.value;
         checkDuplicatedname(newName);
       });
