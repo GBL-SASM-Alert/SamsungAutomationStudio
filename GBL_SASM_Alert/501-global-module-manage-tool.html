@@ -152,6 +152,9 @@
       "click",
       ".global-module-manage__delete-button",
       async function () {
+        const moduleContainer = $(this).closest(
+          ".global-module-manager__module-container"
+        );
         RED.notify("Do you really want to delete this module?", {
           type: "warning",
           buttons: [
@@ -162,11 +165,10 @@
               }
             },
             {
-              text: "okay",
+              text: "delete",
               class: "primary",
               click: function (e) {
-                alert("Delete!");
-                myNotification.close();
+                $(moduleContainer).remove();
               }
             }
           ]
