@@ -40,7 +40,6 @@
 
   .module-manage-tool__module-detail {
     display: none;
-    height: 70px;
     border: solid 1px #aaa;
     padding: 10px;
     font-size: 14px;
@@ -48,15 +47,36 @@
     z-index: 1;
   }
 
+  .module-manage-tool__submodule-title {
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .module-manage-tool__submodule-list {
+    padding: 8px;
+    color: #565656;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+
+  .module-manage-tool__no-submodule {
+    padding: 8px;
+    color: #818181;
+    font-style: italic;
+  }
+
   /* tooltip style */
   .ui-tooltip {
     background: rgba(0, 0, 0, 0.7);
-    padding: 10px 20px;
+    padding: 10px 15px;
     color: white;
-    border-radius: 10px;
-    font: 12px;
+    border-radius: 8px;
     border: none;
     box-shadow: none;
+  }
+
+  .ui-tooltip-content {
+    font-size: 12px;
   }
 </style>
 
@@ -118,8 +138,31 @@
                           <div>${node.name}</div>
                           <div class="module-manage-tool__jump-link" id="${node.id}"><i class="fa fa-compass"></i></div>
                         </div>
-                        <div class="module-manage-tool__module-detail">${node.info}</div>`;
+                        <div class="module-manage-tool__module-detail" >
+                          <div class="module-manage-tool__submodule" id="submodule-${node.id}">
+                            <div class="module-manage-tool__submodule-title">Submodules</div>
+                          </div>
+                        </div>`;
           $(".module-manage-tool__dialog").append(modules);
+
+          const initSubmodulesList = links => {
+            links.forEach(link => {
+              if (link.target.type === "submodule") {
+                $(`#submodule-${node.id}`).append(
+                  `<div class="module-manage-tool__submodule-list" id="${link.target.id}" title="${link.target.info}">${link.target.name}</div>`
+                );
+              }
+            });
+          };
+
+          const links = RED.nodes.getNodeLinks(node.id);
+          initSubmodulesList(links);
+
+          if ($(`#submodule-${node.id}`).children().length === 1) {
+            $(`#submodule-${node.id}`).append(
+              `<div class="module-manage-tool__no-submodule">There are no submodules in this module.</div>`
+            );
+          }
         }
       }
 
@@ -134,11 +177,6 @@
       RED.events.on("groups:change", updateModuleToolDialog);
     })();
 
-    $(document).on("click", ".module-manage-tool__jump-link", function (e) {
-      e.stopPropagation();
-      RED.view.reveal($(this).attr("id"));
-    });
-
     $(document).on("click", ".module-manage-tool__module-title", function () {
       $(this).next(".module-manage-tool__module-detail").slideToggle();
     });
@@ -151,11 +189,40 @@
           position: {
             my: "right-5 bottom",
             at: "left bottom",
-            using: function (position, feedback) {
+            using: function (position) {
               $(this).css(position);
             }
           }
         });
+      }
+    );
+
+    $(document).on(
+      "mouseover",
+      ".module-manage-tool__submodule-list",
+      function () {
+        $(this).tooltip({
+          position: {
+            my: "right bottom",
+            at: "left bottom",
+            using: function (position) {
+              $(this).css(position);
+            }
+          }
+        });
+      }
+    );
+
+    $(document).on("click", ".module-manage-tool__jump-link", function (e) {
+      e.stopPropagation();
+      RED.view.reveal($(this).attr("id"));
+    });
+
+    $(document).on(
+      "click",
+      ".module-manage-tool__submodule-list",
+      function (e) {
+        RED.view.reveal($(this).attr("id"));
       }
     );
 
