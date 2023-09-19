@@ -53,6 +53,7 @@
   }
 
   .module-manage-tool__submodule-list {
+    width: fit-content;
     padding: 8px;
     color: #565656;
     text-decoration: underline;
@@ -63,6 +64,21 @@
     padding: 8px;
     color: #818181;
     font-style: italic;
+  }
+
+  .module-manage-tool__save-button {
+    display: flex;
+    justify-content: end;
+  }
+
+  .module-manage-tool__save-button > div {
+    background-color: cornflowerblue;
+    padding: 8px 0;
+    width: 120px;
+    font-size: 12px;
+    text-align: center;
+    color: #fff;
+    cursor: pointer;
   }
 
   /* tooltip style */
@@ -134,13 +150,18 @@
 
         for (let n in moduleNodes) {
           let node = moduleNodes[n];
-          let modules = `<div class="module-manage-tool__module-title" title="${node.info}">
-                          <div>${node.name}</div>
-                          <div class="module-manage-tool__jump-link" id="${node.id}"><i class="fa fa-compass"></i></div>
-                        </div>
-                        <div class="module-manage-tool__module-detail" >
-                          <div class="module-manage-tool__submodule" id="submodule-${node.id}">
-                            <div class="module-manage-tool__submodule-title">Submodules</div>
+          let modules = `<div>
+                          <div class="module-manage-tool__module-title" title="${node.info}">
+                            <div>${node.name}</div>
+                            <div class="module-manage-tool__jump-link" id="${node.id}"><i class="fa fa-compass"></i></div>
+                          </div>
+                          <div class="module-manage-tool__module-detail" >
+                            <div class="module-manage-tool__submodule" id="submodule-${node.id}">
+                              <div class="module-manage-tool__submodule-title">Submodules</div>
+                            </div>
+                            <div class="module-manage-tool__save-button">
+                              <div><i class="fa fa-save"></i> Save in Local</div>
+                            </div>
                           </div>
                         </div>`;
           $(".module-manage-tool__dialog").append(modules);
@@ -180,6 +201,22 @@
     $(document).on("click", ".module-manage-tool__module-title", function () {
       $(this).next(".module-manage-tool__module-detail").slideToggle();
     });
+
+    $(document).on(
+      "click",
+      ".module-manage-tool__save-button",
+      async function () {
+        const moduleId = $(this).parent().siblings().children()[1].id;
+        const moduleNodeList = RED.nodes.getAllFlowNodes(
+          RED.nodes.node(moduleId)
+        );
+        moduleNodeList.forEach(node => {
+          const nodeLinks = RED.nodes.getNodeLinks(node.id);
+          const wires = [nodeLinks.map(link => link.target.id)];
+          node.wires = wires;
+        });
+      }
+    );
 
     $(document).on(
       "mouseover",
