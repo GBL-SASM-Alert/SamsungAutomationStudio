@@ -25,6 +25,15 @@
     width: calc(100% - 2em) !important;
     padding: 0.5em 1em !important;
   }
+  
+  .global-module-manager__search-box {
+    margin: 5px 0 10px 0;
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #aaa;
+    border-radius: 5px;
+    box-sizing: border-box;
+  }
 
   .global-module-manager__module-container {
     border: solid 1px #aaa;
@@ -108,6 +117,9 @@
         const moduleFiles = await ajax({ url: "/localModules" });
         $(".global-module-manager__dialog").empty();
 
+        const moduleSearchContainer = `<input type="text" class="global-module-manager__search-box" id="moduleSearch" placeholder="Search modules by name and description.">`;
+        $(".global-module-manager__dialog").append(moduleSearchContainer);
+
         moduleFiles.forEach(file => {
           const moduleContainer = $("<div>")
             .addClass("global-module-manager__module-container")
@@ -147,6 +159,30 @@
     const moduleManageToolDialog = document.querySelector(
       ".global-module-manager__dialog"
     );
+
+    $(document).on("input", "#moduleSearch", function () {
+      const searchText = $(this).val().toLowerCase();
+
+      $(".global-module-manager__module-container").each(function () {
+        const moduleTitle = $(this)
+          .find(".global-module-manager__module-title")
+          .text()
+          .toLowerCase();
+        const moduleDetail = $(this)
+          .find(".global-module-manager__module-detail")
+          .text()
+          .toLowerCase();
+
+        if (
+          moduleTitle.includes(searchText) ||
+          moduleDetail.includes(searchText)
+        ) {
+          $(this).show();
+        } else {
+          $(this).hide();
+        }
+      });
+    });
 
     $(document).on(
       "click",
