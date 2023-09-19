@@ -167,8 +167,23 @@
             {
               text: "delete",
               class: "primary",
-              click: function (e) {
+              click: async function (e) {
+                const selectedModuleName = $(moduleContainer)
+                  .children(".global-module-manager__module-title")
+                  .text();
+
+                const notifyObj = await $.ajax({
+                  url: "/delete-selected-module",
+                  type: "POST",
+                  data: { selectedModuleName: selectedModuleName }
+                });
+
                 $(moduleContainer).remove();
+
+                RED.notify(notifyObj["msg"], {
+                  type: notifyObj["type"],
+                  timeout: notifyObj["timeout"]
+                });
               }
             }
           ]
