@@ -45,6 +45,22 @@
     font-size: 12px;
     font-weight: 400;
   }
+
+  .global-module-manage__delete-button {
+    margin-top: 15px;
+    display: flex;
+    justify-content: end;
+  }
+
+  .global-module-manage__delete-button > div {
+    background-color: rgb(237, 100, 100);
+    padding: 8px 0;
+    width: 60px;
+    font-size: 12px;
+    text-align: center;
+    color: #fff;
+    cursor: pointer;
+  }
 </style>
 
 <script type="text/javascript">
@@ -83,7 +99,7 @@
           "title",
           "Modules in Your Local Directory"
         );
-        
+
         $(".global-module-manager__dialog")
           .siblings(".ui-dialog-titlebar")
           .children(".ui-dialog-title")
@@ -111,6 +127,13 @@
             .addClass("global-module-manager__module-detail")
             .text(file.fileContent[0].info);
 
+          const moduleDeleteButton = $(
+            `<div class="global-module-manage__delete-button">
+              <div><i class="fa fa-trash"></i> Delete</div>
+            </div>`
+          );
+          $(moduleDetail).append(moduleDeleteButton);
+
           $(moduleContainer).append(moduleTitle, moduleDetail);
           $(".global-module-manager__dialog").append(moduleContainer);
         });
@@ -123,6 +146,32 @@
     );
     const moduleManageToolDialog = document.querySelector(
       ".global-module-manager__dialog"
+    );
+
+    $(document).on(
+      "click",
+      ".global-module-manage__delete-button",
+      async function () {
+        RED.notify("Do you really want to delete this module?", {
+          type: "warning",
+          buttons: [
+            {
+              text: "cancel",
+              click: function (e) {
+                myNotification.close();
+              }
+            },
+            {
+              text: "okay",
+              class: "primary",
+              click: function (e) {
+                alert("Delete!");
+                myNotification.close();
+              }
+            }
+          ]
+        });
+      }
     );
 
     moduleManageToolButton.addEventListener("click", function (e) {
