@@ -26,7 +26,6 @@ module.exports = function (RED) {
         }
       };
     }
-
     RED.events.on("flows:started", Mapping);
 
     initMapping.isruned = true;
@@ -75,7 +74,6 @@ module.exports = function (RED) {
 
     for (const nodename in namekeyNode) {
       if (namekeyNode[nodename].length != 1) {
-        console.log(nodename);
         namekeyNode[nodename].forEach(nodeID => {
           RED.events.emit("GBLtext:" + nodeID, {
             fill: "red",
@@ -83,6 +81,8 @@ module.exports = function (RED) {
             text: `name "${nodename}" is duplication`
           });
         });
+      } else {
+        RED.events.emit("GBLtext:" + namekeyNode[nodename][0], {});
       }
     }
 
@@ -111,38 +111,37 @@ module.exports = function (RED) {
 
     this.on("close", function () {
       RED.events.removeListener(event, event_fun);
-      this.status({});
+      node.status({});
     });
 
+    const target_error = function () {
+      node.status({
+        fill: "red",
+        shape: "dot",
+        text: "target missed"
+      });
+    };
+
     this.on("input", function (msg) {
+      const mynodes = MappingNodes.get("myModuleflows");
       if (config.moduleId === null) {
-        this.status({
-          fill: "red",
-          shape: "dot",
-          text: "target missed"
-        });
+        target_error();
         return;
       } else if (
-        MappingNodes.get("myModuleflows")[config.moduleId].type != "module_in"
+        typeof mynodes[config.moduleId] === "undefined" ||
+        mynodes[config.moduleId].type != "module_in"
       ) {
-        this.status({
-          fill: "red",
-          shape: "dot",
-          text: "target error"
-        });
+        target_error();
         return;
       } else if (
         config.submoduleId != null &&
-        MappingNodes.get("myModuleflows")[config.submoduleId].type !=
-          "submodule"
+        (typeof mynodes[config.submoduleId] === "undefined" ||
+          mynodes[config.submoduleId].type != "submodule")
       ) {
-        this.status({
-          fill: "red",
-          shape: "dot",
-          text: "target error"
-        });
+        target_error();
         return;
       }
+
       // To return to this node, stack is used.
       if (typeof msg.__GBLstack == "undefined") {
         msg.__GBLstack = [];
@@ -152,8 +151,19 @@ module.exports = function (RED) {
 
       //start linked module in
       if (config.submoduleId === null) {
+        if (typeof mynodes[config.moduleId] === "undefind") {
+          target_error();
+          return;
+        }
+
         RED.events.emit("GBLmodule:" + config.moduleId, msg);
-      } else RED.events.emit("GBLmodule:" + config.submoduleId, msg);
+      } else {
+        if (typeof mynodes[config.submoduleId] === "undefind") {
+          target_error();
+          return;
+        }
+        RED.events.emit("GBLmodule:" + config.submoduleId, msg);
+      }
     });
   }
   RED.nodes.registerType("module_in", module_in);
@@ -169,17 +179,15 @@ module.exports = function (RED) {
     };
     RED.events.on(event, event_fun);
 
-    var node_test_event = "GBLtext:" + node.id;
-    var node_test_event_fun = function (status) {
-      console.log(node.id + " 왜 안되냐....");
-      console.log(status);
+    var node_text_event = "GBLtext:" + node.id;
+    var node_text_event_fun = function (status) {
       node.status(status);
     };
-    RED.events.on(node_test_event, node_test_event_fun);
+    RED.events.on(node_text_event, node_text_event_fun);
 
     this.on("close", function () {
       RED.events.removeListener(event, event_fun);
-      RED.events.removeListener(node_test_event, node_test_event_fun);
+      RED.events.removeListener(node_text_event, node_text_event_fun);
       // node.status({});
     });
 
