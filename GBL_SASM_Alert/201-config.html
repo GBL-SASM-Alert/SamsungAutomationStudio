@@ -55,7 +55,9 @@
       // get all downstream nodes after config node without module-out node
       const moduleFlows = RED.nodes
         .getAllDownstreamNodes(this)
-        .filter(elem => elem.type !== "module_out");
+        .filter(
+          elem => elem.type !== "module_out" && elem.type !== "submodule"
+        );
       console.log(moduleFlows);
       // filter required info from all node's property
       const moduleProperties = moduleFlows.map(node => {
