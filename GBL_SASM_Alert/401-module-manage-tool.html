@@ -133,18 +133,17 @@
 
       /* 모듈 노드 관리 도구 업데이트 */
       function updateModuleToolDialog() {
+        let currentTab = RED.workspaces.active();
+
         $(".module-manage-tool__dialog").attr(
           "title",
-          `Modules in ${RED.nodes.workspace(RED.workspaces.active()).label}`
+          `Modules in Current Tab`
         );
         $(".module-manage-tool__dialog")
           .siblings(".ui-dialog-titlebar")
           .children(".ui-dialog-title")
-          .html(
-            `Modules in ${RED.nodes.workspace(RED.workspaces.active()).label}`
-          );
+          .html(`Modules in Current Tab`);
 
-        let currentTab = RED.workspaces.active();
         let moduleNodes = {};
         $(".module-manage-tool__dialog").empty();
         RED.nodes.eachNode(function (node) {
@@ -326,6 +325,7 @@
         )[0].id;
         toggleModule(selectedModuleId, this);
         $("#red-ui-workspace-chart").scrollTop(scrollTop);
+        $(".red-ui-deploy-button.disabled").removeClass("disabled");
       }
     );
 
