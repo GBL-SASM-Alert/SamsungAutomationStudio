@@ -51,9 +51,7 @@
       let currentTab = RED.workspaces.active();
       RED.nodes.eachNode(function (node) {
         if (node.type === "module_in" && node.z == currentTab) {
-          let option = $("<option></option>");
-          option.text(node.name);
-          option.val(node.id);
+          let option = `<option value="${node.id}" title="${node.info}">${node.name}</option>`;
           moduleSelectElem.append(option);
 
           //mapping description
@@ -74,9 +72,7 @@
       let submoduleSelectElem = $("#submodule-select");
 
       let initSubmoduleOptions = function (node) {
-        let option = $("<option></option>");
-        option.text(node.name);
-        option.val(node.id);
+        let option = `<option value="${node.id}" title="${node.info}">${node.name}</option>`;
         submoduleSelectElem.append(option);
 
         //mapping description
