@@ -155,10 +155,10 @@
 
         for (let n in moduleNodes) {
           let node = moduleNodes[n];
-          const isModuleVisible =
-            $(`g[id="${node.id}"]`).css("display") !== "none";
 
+          const isModuleVisible = RED.nodes.node(node.id).x > 0;
           const visibleIcon = isModuleVisible ? "fa-eye" : "fa-eye-slash";
+
           let modules = `<div>
                           <div class="module-manage-tool__module-title" title="${node.info}">
                             <div class="module-manage-tool__toggle-visibility"><i class="fa ${visibleIcon}"></i></div>
@@ -302,68 +302,17 @@
 
     /* module visibility */
     const toggleModule = (selectedModuleId, clickedBtn) => {
-      const isVisible =
-        $(`g[id="${selectedModuleId}"]`).css("display") !== "none";
-      const getNodeInfo = node => {
-        const nodeId = node.id;
-        const nodeElement = $(`g[id="${nodeId}"]`);
-
-        const matches = nodeElement
-          .attr("transform")
-          .match(/translate\(([^,]+),([^)]+)\)/);
-        const nodePos = [parseFloat(matches[1]), parseFloat(matches[2])];
-        if (isVisible) {
-          $(clickedBtn).children("i").attr("class", "fa fa-eye-slash");
-          $(nodeElement).hide();
-        } else {
-          $(clickedBtn).children("i").attr("class", "fa fa-eye");
-          $(nodeElement).show();
-        }
-
-        const getPortInfo = portClass => {
-          return Array.from(
-            nodeElement.children(`.red-ui-flow-port-${portClass}`)
-          ).map(port => {
-            const portMatches = $(port)
-              .attr("transform")
-              .match(/translate\(([^,]+),([^)]+)\)/);
-            return {
-              x: nodePos[0] + parseFloat(portMatches[1]) + 5,
-              y: nodePos[1] + parseFloat(portMatches[2]) + 5
-            };
-          });
-        };
-
-        return {
-          id: nodeId,
-          inputs: getPortInfo("input"),
-          outputs: getPortInfo("output")
-        };
-      };
-
       const selectedModuleNodeList = RED.nodes.getAllFlowNodes(
         RED.nodes.node(selectedModuleId)
       );
-      const moduleNodeInfo = selectedModuleNodeList.map(getNodeInfo);
 
-      moduleNodeInfo.forEach(module1 => {
-        moduleNodeInfo.forEach(module2 => {
-          if (module1.id !== module2.id) {
-            module1.inputs.forEach(input => {
-              module2.outputs.forEach(output => {
-                const link = $(
-                  `path[d^='M ${output.x} ${output.y}'][d$='${input.x} ${input.y}']`
-                ).parent();
-                if (isVisible) {
-                  link.hide();
-                } else {
-                  link.show();
-                }
-              });
-            });
-          }
-        });
+      selectedModuleNodeList.forEach(node => {
+        node.x = -node.x;
       });
+
+      const workspaceId = RED.workspaces.active();
+      RED.workspaces.hide(workspaceId);
+      RED.workspaces.show(workspaceId);
     };
 
     $(document).on(
@@ -371,10 +320,12 @@
       ".module-manage-tool__toggle-visibility",
       function (e) {
         e.stopPropagation();
+        const scrollTop = $("#red-ui-workspace-chart").scrollTop();
         const selectedModuleId = $(this).siblings(
           ".module-manage-tool__jump-link"
         )[0].id;
         toggleModule(selectedModuleId, this);
+        $("#red-ui-workspace-chart").scrollTop(scrollTop);
       }
     );
 
