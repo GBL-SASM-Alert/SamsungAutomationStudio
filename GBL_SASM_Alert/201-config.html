@@ -58,7 +58,6 @@
         .filter(
           elem => elem.type !== "module_out" && elem.type !== "submodule"
         );
-      console.log(moduleFlows);
       // filter required info from all node's property
       const moduleProperties = moduleFlows.map(node => {
         return {
