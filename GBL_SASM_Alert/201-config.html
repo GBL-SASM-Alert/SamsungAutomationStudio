@@ -1,11 +1,29 @@
 <style>
   .property-container {
-    width: 90%;
+    width: 100%;
     margin: 15px 0;
   }
   .property-inner {
     display: flex;
     justify-content: space-between;
+    padding: 8px;
+  }
+  div.property-list {
+    border: solid 1px #aaa;
+    background-color: #e6eeff;
+    margin: 8px 0;
+  }
+  textarea {
+    width: 90%;
+    height: 8rem;
+    resize: none;
+    margin: 0 5%;
+  }
+  div.toggle-button {
+    border: solid 1px #aaa;
+    background-color: #ccc;
+    cursor: pointer;
+    padding: 8px 8px;
   }
 </style>
 
@@ -23,12 +41,13 @@
       return this.name || "module config";
     },
     oneditprepare: function () {
+      console.log(RED.nodes);
       $(document).ready(function () {
         // initially, hide property list
         $(".property-list").hide();
 
         // click event handler for toggle-button
-        $("button.toggle-button").click(function () {
+        $("div.toggle-button").click(function () {
           $(this.nextSibling).toggle();
         });
 
@@ -42,9 +61,6 @@
                   "placeholder",
                   "Please write a description for the property."
                 )
-                .css("width", "100%")
-                .css("height", "8rem")
-                .css("resize", "none")
             );
           } else {
             $(this.parentNode.parentNode).children()[1].remove();
@@ -69,17 +85,27 @@
         };
       });
 
-      const nodeCheckboxList = $("#node-checkbox-list");
+      const $nodeCheckboxContainer = $("#node-checkbox-container");
+      if (moduleProperties) {
+        const $nodesTitle = $("<h3>").text("Nodes in current module");
+        $nodeCheckboxContainer.prepend($nodesTitle);
+      }
 
+      const nodeCheckboxList = $("#node-checkbox-list");
       moduleProperties.forEach(element => {
         // add the node name to toggle properties.
         const $node = $("<div>").attr("class", "form-row");
-        const $nodeName = $("<label>").text(element.nodeName);
-        const $toggleButton = $("<button>")
+        const $nodeName = $("<div>")
           .attr("class", "toggle-button")
-          .html("&#9662;");
+          .html(element.nodeName + " &#9660;");
+
         const $propertyList = $("<div>").attr("class", "property-list");
-        $node.append($nodeName).append($toggleButton).append($propertyList);
+        const $propertiesTitle = $("<h3>")
+          .text(`Properties of ${element.nodeName} node`)
+          .css("padding-left", "8px");
+        $propertyList.append($propertiesTitle);
+
+        $node.append($nodeName).append($propertyList);
 
         nodeCheckboxList.append($node);
 
@@ -89,14 +115,13 @@
             "class",
             "property-container"
           );
+
           const $propertyInner = $("<div>").attr("class", "property-inner");
           const $nodeId = $("<span>")
             .attr("id", "node-id")
             .text(element.nodeId)
             .css("display", "none");
-          const $nodeProperty = $("<span>").text(
-            element.nodeName + "." + property
-          );
+          const $nodeProperty = $("<span>").text(property);
           const $checkBox = $("<input>")
             .attr("type", "checkbox")
             .attr("class", "property-checkbox");
@@ -123,10 +148,7 @@
                 "placeholder",
                 "Please write a description for the property."
               )
-              .val(targetProperty.description)
-              .css("width", "100%")
-              .css("height", "8rem")
-              .css("resize", "none");
+              .val(targetProperty.description);
             $propertyContainer.append($textarea);
           }
         });
@@ -149,7 +171,7 @@
           node.properties.push({
             nodeId: nodeId,
             nodeName: nodeProperty[0],
-            property: nodeProperty[1],
+            propertyName: nodeProperty[1],
             description: description
           });
         }
@@ -165,7 +187,7 @@
     <input type="text" id="node-input-name" placeholder="Name" />
   </div>
   <!--nodes in module-->
-  <div>
+  <div id="node-checkbox-container">
     <div id="node-checkbox-list"></div>
   </div>
 </script>
