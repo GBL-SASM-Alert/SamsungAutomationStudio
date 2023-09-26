@@ -1,11 +1,17 @@
 <style>
   .description-box {
-    width: 80%;
-    margin: 20px auto;
-    padding: 30px;
+    width: 100%;
+    margin: 0px 0px 12px 0px;
+    padding: 5px;
     position: relative;
-    border-radius: 5px;
-    box-shadow: 0 0 2px 2px #dedede;
+    border-left: 5px solid #333333;
+  }
+  .property-description-box {
+    width: 100%;
+    margin: 12px 0px 12px 0px;
+    padding: 5px;
+    position: relative;
+    border-left: 5px solid #333333;
   }
   .error-box {
     font-size: 8pt;
@@ -70,7 +76,30 @@
       $("#module-description").text(descriptionMap.get(this.moduleId));
 
       //###2. init submodule select
+      let submoduleElem = $("#submodule");
       let submoduleSelectElem = $("#submodule-select");
+
+      let initSubmodule = function () {
+        let newDiv = $("<div>").addClass("form-row");
+        let label = $("<label>").attr("for", "node-input-scope");
+        let icon = $("<i>").addClass("fa fa-random");
+        let span = $("<span>").text("SubModule");
+
+        label.append(icon);
+        label.append(span);
+        newDiv.append(label);
+
+        let select = $("<select>").attr("id", "submodule-select");
+        let descriptionBox = $("<div>")
+          .attr("id", "submodule-description")
+          .addClass("description-box");
+
+        newDiv.append(select);
+        submoduleElem.append(newDiv);
+        submoduleElem.append(descriptionBox);
+        //mapping description
+        descriptionMap.set(node.id, node.info);
+      };
 
       let initSubmoduleOptions = function (node) {
         let option = `<option value="${node.id}" title="${node.info}">${node.name}</option>`;
@@ -94,7 +123,11 @@
         } else {
           $("#submodule-select option:eq(0)").prop("selected", true);
         }
-        $("#submodule-description").text(descriptionMap.get(this.submoduleId));
+        $("#submodule-description").text(
+          descriptionMap.get(this.submoduleId)
+            ? descriptionMap.get(this.submoduleId)
+            : "submodule lacks a description"
+        );
       }
 
       //###2.3 init module properties inputs
@@ -106,10 +139,12 @@
             link.target.properties.forEach(property => {
               let nodeOfModule = RED.nodes.node(property.nodeId);
               if (nodeOfModule.id === property.nodeId) {
-                let label = $("<label>").attr("for", "property-input-scope");
-                label.append('<i class="fa fa-gear"</i>');
-                label.append("<span> " + property.propertyName + " </span>");
-                label.css("display", "inline");
+                let newDiv = $("<div>");
+                newDiv.addClass("form-row");
+
+                let label = $("<label>").attr("for", "node-input-scope");
+                label.append('<i class="fa fa-gear"> </i>');
+                label.append("<span> " + property.propertyName + "</span>");
 
                 let input = $("<input>")
                   .val(
@@ -118,12 +153,17 @@
                       : nodeOfModule[property.propertyName]
                   )
                   .attr("type", "text")
-                  .attr("name", property.propertyName)
-                  .css("display", "inline");
+                  .attr("name", property.propertyName);
 
-                let descriptionDev = $("<span> ").text(property.description);
-                propertySelectElem.append(label, input, descriptionDev);
-                propertySelectElem.append("<br>");
+                let descriptionDev = $(
+                  '<div id="description-box" class="property-description-box">'
+                ).text(
+                  property.description
+                    ? property.description
+                    : "property lacks a description"
+                );
+                newDiv.append(label, input, descriptionDev);
+                propertySelectElem.append(newDiv);
               }
             });
           }
@@ -167,6 +207,7 @@
         $("div#property-input div").remove();
         $("div#property-input br").remove();
         //get new link and init options
+        let links = RED.nodes.getNodeLinks(changedModuleId);
         initPropertyInputs(links);
       });
 
@@ -189,29 +230,33 @@
       node.submoduleId = $("#submodule-select").val();
 
       //properties save and customize other module nodes
-      let links = RED.nodes.getNodeLinks(node.moduleId);
-      links.forEach(link => {
-        if (link.target.type === "config") {
-          node.properties = link.target.properties;
-        }
-      });
-
-      let inputs = $("#property-input input");
-      node.properties.forEach(property => {
-        let nodeOfModule = RED.nodes.node(property.nodeId);
-        inputs.each(function () {
-          let inputName = $(this).attr("name");
-          let inputValue = $(this).val();
-
-          if (property.propertyName === inputName) {
-            nodeOfModule[inputName] =
-              typeof nodeOfModule[inputName] === "object"
-                ? JSON.parse(inputValue)
-                : inputValue;
-            RED.nodes.add(nodeOfModule);
+      if (node.moduleId) {
+        let links = RED.nodes.getNodeLinks(node.moduleId);
+        links.forEach(link => {
+          if (link.target.type === "config") {
+            node.properties = link.target.properties;
           }
         });
-      });
+
+        let inputs = $("#property-input input");
+        node.properties.forEach(property => {
+          let nodeOfModule = RED.nodes.node(property.nodeId);
+          inputs.each(function () {
+            let inputName = $(this).attr("name");
+            let inputValue = $(this).val();
+
+            if (property.propertyName === inputName) {
+              nodeOfModule[inputName] =
+                typeof nodeOfModule[inputName] === "object"
+                  ? JSON.parse(inputValue)
+                  : inputValue;
+              RED.nodes.add(nodeOfModule);
+
+              property[inputName] = inputValue;
+            }
+          });
+        });
+      }
     },
     oneditcancle: function () {}
   });
@@ -394,24 +439,24 @@
     <div id="module-description" class="description-box"></div>
   </div>
   <!--submodule-->
-  <div>
-    <div class="form-row">
+  <div id="submodule">
+    <!-- <div class="form-row">
       <label for="node-input-scope">
         <i class="fa fa-random"></i> <span>SubModule</span>
       </label>
       <select id="submodule-select"></select>
     </div>
-    <div id="submodule-description" class="description-box"></div>
+    <div id="submodule-description" class="description-box"></div> -->
   </div>
+  <hr width="100%" color="black" size="4" />
   <!--module property-->
-  <div>
+  <div id="property-input">
     <div class="form-row">
       <label for="node-input-scope">
-        <i class="fa fa-random"></i>
+        <i class="fa fa-gear"></i>
         <span>Property</span>
       </label>
     </div>
-    <div id="property-input"></div>
   </div>
 </script>
 
