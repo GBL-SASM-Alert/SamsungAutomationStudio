@@ -309,8 +309,9 @@
         node.x = -(node.x + 500);
       });
 
-      RED.workspaces.add();
-      RED.workspaces.remove();
+      const workspaceId = RED.workspaces.active();
+      RED.workspaces.hide(workspaceId);
+      RED.workspaces.show(workspaceId);
     };
 
     $(document).on(
