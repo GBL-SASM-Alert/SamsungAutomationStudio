@@ -50,8 +50,10 @@ module.exports = function (RED) {
     const workspaces = {};
     const subflows = {};
 
+    var count = 0;
     // Iterate through all nodes in the flow.
     RED.nodes.eachNode(node => {
+      count++;
       allNode[node.id] = Object.assign({}, node);
       if (node.type === "tab") {
         workspaces[node.id] = node;
@@ -127,6 +129,7 @@ module.exports = function (RED) {
         } else {
           RED.events.emit("GBLtext:" + subflownamekey[subnodename][0], {});
         }
+
       }
     }
 
@@ -226,6 +229,7 @@ module.exports = function (RED) {
 
     initMapping(node.context().global);
 
+
     var event = "GBLmodule:" + node.id;
     var event_fun = function (msg) {
       node.receive(msg);
@@ -234,6 +238,7 @@ module.exports = function (RED) {
 
     var node_text_event = "GBLtext:" + node.id;
     var node_text_event_fun = function (status) {
+      // node.receive({ GBL__: status });
       node.status(status);
     };
     RED.events.on(node_text_event, node_text_event_fun);
@@ -244,6 +249,13 @@ module.exports = function (RED) {
     });
 
     this.on("input", function (msg) {
+      if (typeof msg["GBL__"] != "undefined") {
+        console.log(node.id);
+        console.log(msg["GBL__"]);
+        node.status(msg["GBL__"]);
+        return;
+      }
+
       node.send(msg);
     });
   }
