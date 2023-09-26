@@ -75,9 +75,8 @@
       }
       $("#module-description").text(descriptionMap.get(this.moduleId));
 
-      //###2. init submodule select
+      //###2. init submodule
       let submoduleElem = $("#submodule");
-      let submoduleSelectElem = $("#submodule-select");
 
       let initSubmodule = function () {
         let newDiv = $("<div>").addClass("form-row");
@@ -97,11 +96,10 @@
         newDiv.append(select);
         submoduleElem.append(newDiv);
         submoduleElem.append(descriptionBox);
-        //mapping description
-        descriptionMap.set(node.id, node.info);
       };
 
       let initSubmoduleOptions = function (node) {
+        let submoduleSelectElem = $("#submodule-select");
         let option = `<option value="${node.id}" title="${node.info}">${node.name}</option>`;
         submoduleSelectElem.append(option);
 
@@ -111,6 +109,18 @@
 
       //2.2 default submodule option
       if (this.moduleId) {
+        let isSubmoduleExist = false;
+
+        RED.nodes
+          .getAllDownstreamNodes(RED.nodes.node(this.moduleId))
+          .forEach(node => {
+            if (node.type === "submodule") {
+              isSubmoduleExist = true;
+            }
+          });
+
+        if (isSubmoduleExist) initSubmodule();
+
         RED.nodes
           .getAllDownstreamNodes(RED.nodes.node(this.moduleId))
           .forEach(node => {
@@ -118,16 +128,15 @@
               initSubmoduleOptions(node);
             }
           });
+
+        let submoduleSelectElem = $("#submodule-select");
+
         if (this.submoduleId) {
           submoduleSelectElem.val(this.submoduleId).prop("selected", true);
         } else {
           $("#submodule-select option:eq(0)").prop("selected", true);
         }
-        $("#submodule-description").text(
-          descriptionMap.get(this.submoduleId)
-            ? descriptionMap.get(this.submoduleId)
-            : "submodule lacks a description"
-        );
+        $("#submodule-description").text(descriptionMap.get(this.submoduleId));
       }
 
       //###2.3 init module properties inputs
@@ -185,9 +194,21 @@
         $("#module-description").text(descriptionMap.get(changedModuleId));
 
         //3.2 Dynamic submodule select
-        //clear options
-        $("select#submodule-select option").remove();
+        //clear submodule
+        $("#submodule div").remove();
         //get new link and init options
+        let isSubmoduleExist = false;
+
+        RED.nodes
+          .getAllDownstreamNodes(RED.nodes.node(changedModuleId))
+          .forEach(node => {
+            if (node.type === "submodule") {
+              isSubmoduleExist = true;
+            }
+          });
+
+        if (isSubmoduleExist) initSubmodule();
+
         RED.nodes
           .getAllDownstreamNodes(RED.nodes.node(changedModuleId))
           .forEach(node => {
@@ -211,11 +232,12 @@
         initPropertyInputs(links);
       });
 
-      $("#submodule-select").on("change", function () {
+      $("#submodule").on("change", function () {
         let changedSubmoduleId = $("#submodule-select").val();
         $("#submodule-description").text(
           descriptionMap.get(changedSubmoduleId)
         );
+        console.log(descriptionMap.get(changedSubmoduleId));
       });
     },
     oneditsave: function () {
@@ -257,6 +279,8 @@
           });
         });
       }
+
+      console.log(node);
     },
     oneditcancle: function () {}
   });
@@ -452,10 +476,6 @@
   <!--module property-->
   <div id="property-input">
     <div class="form-row">
-      <label for="node-input-scope">
-        <i class="fa fa-gear"></i>
-        <span>Property</span>
-      </label>
     </div>
   </div>
 </script>
