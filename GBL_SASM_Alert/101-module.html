@@ -75,31 +75,10 @@
       }
       $("#module-description").text(descriptionMap.get(this.moduleId));
 
-      //###2. init submodule
-      let submoduleElem = $("#submodule");
-
-      let initSubmodule = function () {
-        let newDiv = $("<div>").addClass("form-row");
-        let label = $("<label>").attr("for", "node-input-scope");
-        let icon = $("<i>").addClass("fa fa-random");
-        let span = $("<span>").text("SubModule");
-
-        label.append(icon);
-        label.append(span);
-        newDiv.append(label);
-
-        let select = $("<select>").attr("id", "submodule-select");
-        let descriptionBox = $("<div>")
-          .attr("id", "submodule-description")
-          .addClass("description-box");
-
-        newDiv.append(select);
-        submoduleElem.append(newDiv);
-        submoduleElem.append(descriptionBox);
-      };
+      //###2. init submodule select
+      let submoduleSelectElem = $("#submodule-select");
 
       let initSubmoduleOptions = function (node) {
-        let submoduleSelectElem = $("#submodule-select");
         let option = `<option value="${node.id}" title="${node.info}">${node.name}</option>`;
         submoduleSelectElem.append(option);
 
@@ -110,34 +89,24 @@
       //2.2 default submodule option
       if (this.moduleId) {
         let isSubmoduleExist = false;
-
-        RED.nodes
-          .getAllDownstreamNodes(RED.nodes.node(this.moduleId))
-          .forEach(node => {
-            if (node.type === "submodule") {
-              isSubmoduleExist = true;
-            }
-          });
-
-        if (isSubmoduleExist) initSubmodule();
-
         RED.nodes
           .getAllDownstreamNodes(RED.nodes.node(this.moduleId))
           .forEach(node => {
             if (node.type === "submodule") {
               initSubmoduleOptions(node);
+              isSubmoduleExist = true;
             }
           });
-
-        let submoduleSelectElem = $("#submodule-select");
-
         if (this.submoduleId) {
           submoduleSelectElem.val(this.submoduleId).prop("selected", true);
         } else {
           $("#submodule-select option:eq(0)").prop("selected", true);
         }
         $("#submodule-description").text(descriptionMap.get(this.submoduleId));
+
+        if (!isSubmoduleExist) $("#submodule").css("display", "none");
       }
+      
 
       //###2.3 init module properties inputs
       let propertySelectElem = $("#property-input");
@@ -194,8 +163,8 @@
         $("#module-description").text(descriptionMap.get(changedModuleId));
 
         //3.2 Dynamic submodule select
-        //clear submodule
-        $("#submodule div").remove();
+        //clear options
+        $("select#submodule-select option").remove();
         //get new link and init options
         let isSubmoduleExist = false;
 
@@ -203,19 +172,13 @@
           .getAllDownstreamNodes(RED.nodes.node(changedModuleId))
           .forEach(node => {
             if (node.type === "submodule") {
+              initSubmoduleOptions(node);
               isSubmoduleExist = true;
             }
           });
 
-        if (isSubmoduleExist) initSubmodule();
-
-        RED.nodes
-          .getAllDownstreamNodes(RED.nodes.node(changedModuleId))
-          .forEach(node => {
-            if (node.type === "submodule") {
-              initSubmoduleOptions(node);
-            }
-          });
+        if (!isSubmoduleExist) $("#submodule").css("display", "none");
+        else $("#submodule").css("display", "block");
         //default first element selected
         $("#submodule-select option:eq(0)").prop("selected", true);
         $("#submodule-description").text(
@@ -232,12 +195,11 @@
         initPropertyInputs(links);
       });
 
-      $("#submodule").on("change", function () {
+      $("#submodule-select").on("change", function () {
         let changedSubmoduleId = $("#submodule-select").val();
         $("#submodule-description").text(
           descriptionMap.get(changedSubmoduleId)
         );
-        console.log(descriptionMap.get(changedSubmoduleId));
       });
     },
     oneditsave: function () {
@@ -279,8 +241,6 @@
           });
         });
       }
-
-      console.log(node);
     },
     oneditcancle: function () {}
   });
@@ -464,13 +424,13 @@
   </div>
   <!--submodule-->
   <div id="submodule">
-    <!-- <div class="form-row">
+    <div class="form-row">
       <label for="node-input-scope">
         <i class="fa fa-random"></i> <span>SubModule</span>
       </label>
       <select id="submodule-select"></select>
     </div>
-    <div id="submodule-description" class="description-box"></div> -->
+    <div id="submodule-description" class="description-box"></div>
   </div>
   <hr width="100%" color="black" size="4" />
   <!--module property-->
