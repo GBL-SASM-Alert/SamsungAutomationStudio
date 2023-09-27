@@ -129,7 +129,6 @@ module.exports = function (RED) {
         } else {
           RED.events.emit("GBLtext:" + subflownamekey[subnodename][0], {});
         }
-
       }
     }
 
@@ -172,15 +171,12 @@ module.exports = function (RED) {
     this.on("input", function (msg) {
       const mynodes = MappingNodes.get("myModuleflows");
       if (config.moduleId === null) {
-        console.log("1");
         target_error();
         return;
       } else if (
         typeof mynodes[config.moduleId] === "undefined" ||
         mynodes[config.moduleId].type != "moduleflows_in"
       ) {
-        console.log("2");
-
         target_error();
         return;
       } else if (
@@ -188,8 +184,6 @@ module.exports = function (RED) {
         (typeof mynodes[config.submoduleId] === "undefined" ||
           mynodes[config.submoduleId].type != "submoduleflows")
       ) {
-        console.log("3");
-
         target_error();
         return;
       }
@@ -204,8 +198,6 @@ module.exports = function (RED) {
       //start linked moduleflows in
       if (config.submoduleId === null) {
         if (typeof mynodes[config.moduleId] === "undefind") {
-          console.log("4");
-
           target_error();
           return;
         }
@@ -213,8 +205,6 @@ module.exports = function (RED) {
         RED.events.emit("GBLmodule:" + config.moduleId, msg);
       } else {
         if (typeof mynodes[config.submoduleId] === "undefind") {
-          console.log("5");
-
           target_error();
           return;
         }
@@ -228,7 +218,6 @@ module.exports = function (RED) {
     const node = this;
 
     initMapping(node.context().global);
-
 
     var event = "GBLmodule:" + node.id;
     var event_fun = function (msg) {
@@ -250,8 +239,6 @@ module.exports = function (RED) {
 
     this.on("input", function (msg) {
       if (typeof msg["GBL__"] != "undefined") {
-        console.log(node.id);
-        console.log(msg["GBL__"]);
         node.status(msg["GBL__"]);
         return;
       }

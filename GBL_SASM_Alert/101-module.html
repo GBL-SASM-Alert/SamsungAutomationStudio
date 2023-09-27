@@ -41,7 +41,6 @@
       return "moduleflows_white.png";
     },
     label: function () {
-      //change module name => change node name
       return this.name || "moduleflows";
     },
     //open editor box
@@ -106,7 +105,6 @@
 
         if (!isSubmoduleExist) $("#submodule").css("display", "none");
       }
-      
 
       //###2.3 init module properties inputs
       let propertySelectElem = $("#property-input");
@@ -330,8 +328,6 @@
               //same name => change node duplicatedError
               node.errorMsg = "Duplicated name";
               node.duplicatedError = true;
-              // console.log(node.errorMsg);
-              // console.log(node.duplicatedError);
 
               thiz.errorMsg = "Duplicated name";
               thiz.duplicatedError = true;
@@ -339,8 +335,6 @@
             } else {
               node.errorMsg = "Available name";
               node.duplicatedError = false;
-              // console.log(node.errorMsg);
-              // console.log(node.duplicatedError);
 
               //ok
               thiz.errorMsg = "Available name";
@@ -435,8 +429,7 @@
   <hr width="100%" color="black" size="4" />
   <!--module property-->
   <div id="property-input">
-    <div class="form-row">
-    </div>
+    <div class="form-row"></div>
   </div>
 </script>
 
